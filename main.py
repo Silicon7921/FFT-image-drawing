@@ -7,7 +7,7 @@ one_time = 1  # time speed (1 by default)
 scale = 0.75  # scale
 FPS = 144  # framerate (controls game speed) 
 point_size = 1
-start_xy = (WINDOW_W // 2+500, WINDOW_H // 2+300)  # offset of everything.
+start_xy = (WINDOW_W // 2+500, WINDOW_H // 2+300)  # offset for everything.
 
 b_scale = 1
 b_color = (250, 220, 70) # circle color
