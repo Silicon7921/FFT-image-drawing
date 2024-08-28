@@ -6,9 +6,9 @@ main.py use pygame to show everything.
 you may change some variables to adjust the window size, gamespeed, color and more.
 
 ### About tosvg.py
-tosvg.py generates svg from png.
-the output cannot be used directly.
-all you can do is putting it into Adobe Illustrator or Inkscape and draw a svg with only one closed path.
+tosvg.py generates Scalable Vector Graphics from bitmap image.
+the output cannot be used directly because it contains useless xml things and multiple paths.
+the easiest way to use the output is just putting it into Adobe Illustrator and draw a svg with only one closed path by yourself.
 
 ### About fourier.py:
 fourier.py handles path data parsing and wave data generation.

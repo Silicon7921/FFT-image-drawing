@@ -67,6 +67,9 @@ def bitmap_to_contour_svg(input_bitmap_path : str, output_svg_path : str):
     
 if __name__ == '__main__':
     bitmap_to_contour_svg(
-        input_bitmap_path="./images/INPUT.png",
+        
+        #edit input filename and output filename here   
+        
+        input_bitmap_path="./images/input.png",
         output_svg_path="./images/output.svg"
     )
