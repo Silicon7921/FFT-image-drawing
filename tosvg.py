@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         # init main window
-        self.setWindowTitle("Choose File...")
+        self.setWindowTitle("Simple SVG Generator")
         self.setGeometry(100, 100, 200, 200)
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
@@ -37,14 +37,13 @@ class MainWindow(QMainWindow):
         self.folder_path = None
 
     def select_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Choose File", "", "PNG (*.PNG);;JPG (*.JPG);;BMP (*.BMP);;All Files (*)","PNG (*.PNG)")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Select File...", "", "PNG (*.PNG);;JPG (*.JPG);;BMP (*.BMP);;All Files (*)","PNG (*.PNG)")
         if file_name:
             self.file_path = file_name
     def select_folder(self):
-        folder_name = QFileDialog.getExistingDirectory(self, "Choose Output Folder")
+        folder_name = QFileDialog.getExistingDirectory(self, "Select Output Folder")
         if folder_name:
             self.folder_path = folder_name
-
     def finish(self):
         #check if two variable are defined
         if self.file_path==None or self.folder_path== None:
@@ -61,10 +60,6 @@ class MainWindow(QMainWindow):
     def closeEvent(self,event):
         sys.exit()
 
-""" def look_shape(a : Iterable) -> Tuple:
-    # for debug
-    return np.array(a).shape """
-
 def length_within_points(a : Iterable, empty_value : Union[int, float] = 0) -> int:
     a = list(a)
     l_pivot, r_pivot = -1, -2
@@ -73,7 +68,6 @@ def length_within_points(a : Iterable, empty_value : Union[int, float] = 0) -> i
             l_pivot = index
         if r_val != empty_value and r_pivot == -2:
             r_pivot = len(a) - index
-
     return r_pivot - l_pivot + 1
 
 def dump_rings_from_image(image : np.ndarray, output_path : str, plot_dict : dict = {"color" : "k", "linewidth" : 2.0}, default_height : float = 8) -> List[np.ndarray]:

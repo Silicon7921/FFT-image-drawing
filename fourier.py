@@ -1,9 +1,19 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from PyQt6.QtWidgets import QApplication, QFileDialog
+
+def select_file():
+    app = QApplication(sys.argv)
+    filepath, _=QFileDialog.getOpenFileName(None, "Select correct path file...", "", "TXT (*.TXT)","TXT (*.TXT)")
+    if filepath:
+        return filepath
+    else:
+        print("ABORT")
+        sys.exit()
 
 try:
-    with open("path.txt","r") as file:
+    with open(select_file(),"r") as file:
         path = file.read()
 except FileNotFoundError:
     print("path file not exist.")
@@ -49,7 +59,7 @@ while i < path_len:
                 assert len(b_list) == 4
                 l_list.append([a, *b_list])
             else:
-                print("未知的：", s)
+                print("Unknown character：", s)
     else:
         print("error:", path[i])
         i += 1
@@ -80,11 +90,12 @@ y_matrix = np.array(point_list)
 
 y_len = len(y)
 yy = np.fft.fft(y) # so simple. numpy did everything for me.
-print(y_len, len(yy))
+# FOR DEBUG:
+#print(y_len, len(yy))
 
 plt.plot(y_matrix[:, 0], y_matrix[:, 1])
 
-#FOR DEBUG:
+# FOR DEBUG:
 #plt.show()
 
 """ def fuck(v):
