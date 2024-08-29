@@ -1,7 +1,7 @@
 import pygame, math, os, sys
 from pygame.locals import *
-from PyQt6.QtWidgets import QApplication, QMainWindow,QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QPushButton, QLineEdit, QMessageBox
-from PyQt6.QtGui import QCloseEvent, QColor, QIntValidator, QDoubleValidator
+from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QPushButton, QLineEdit, QMessageBox
+from PyQt6.QtGui import QColor, QIntValidator, QDoubleValidator
 import fourier
 
 class MainWindow(QWidget):  
@@ -13,20 +13,23 @@ class MainWindow(QWidget):
         
         #init main window
         self.setWindowTitle('Configuration')  
-        self.setGeometry(100, 100, 450, 250)  
+        self.setGeometry(100, 100, 200, 160)  
         mainlayout=QVBoxLayout()
         
         """
-        huge amounts of pyqt gui code. no more explaination.
+        huge amounts of pyqt6 gui code. no more explaination.
         """
         
         """row 1"""
         layout1 = QHBoxLayout()  
-        self.label1 = QLabel('Config Circle Color', self)  
+        self.label1 = QLabel('Circle Color', self)  
         layout1.addWidget(self.label1)  
         self.combo1 = QComboBox(self)  
+        self.combo1.setFixedSize(60,20)
         self.combo2 = QComboBox(self)  
+        self.combo2.setFixedSize(60,20)
         self.combo3 = QComboBox(self)  
+        self.combo3.setFixedSize(60,20)
         for i in range(256):
             self.combo1.addItem(str(i))
             self.combo2.addItem(str(i))
@@ -45,11 +48,14 @@ class MainWindow(QWidget):
         
         """row 2"""
         layout2 = QHBoxLayout()
-        self.label2 = QLabel('Config Track Color', self)
+        self.label2 = QLabel('Track Color', self)
         layout2.addWidget(self.label2)
         self.combo4 = QComboBox(self)
+        self.combo4.setFixedSize(60,20)
         self.combo5 = QComboBox(self)
+        self.combo5.setFixedSize(60,20)
         self.combo6 = QComboBox(self)
+        self.combo6.setFixedSize(60,20)
         for i in range(256):
             self.combo4.addItem(str(i))
             self.combo5.addItem(str(i))
@@ -68,11 +74,14 @@ class MainWindow(QWidget):
         
         """row 3"""
         layout3 = QHBoxLayout()
-        label3 = QLabel('Config Background Color', self)
+        label3 = QLabel('Background Color', self)
         layout3.addWidget(label3)
         self.combo7 = QComboBox(self)
+        self.combo7.setFixedSize(60,20)
         self.combo8 = QComboBox(self)
+        self.combo8.setFixedSize(60,20)
         self.combo9 = QComboBox(self)
+        self.combo9.setFixedSize(60,20)
         for i in range(256):
             self.combo7.addItem(str(i))
             self.combo8.addItem(str(i))
@@ -177,6 +186,8 @@ class MainWindow(QWidget):
     
     def finish(self, event):
         
+        self.hide()
+        
         circle_color = (int(self.combo1.currentText()), int(self.combo2.currentText()), int(self.combo3.currentText()))
         track_color = (int(self.combo4.currentText()), int(self.combo5.currentText()), int(self.combo6.currentText()))
         background_color = (int(self.combo7.currentText()), int(self.combo8.currentText()), int(self.combo9.currentText()))
@@ -216,26 +227,27 @@ class MainWindow(QWidget):
             msgbox.setWindowTitle("Unknown Error")
             msgbox.exec()
         
-        WINDOW_W=window_W
-        WINDOW_H=window_H
-        FPS=fps
-        one_time=1
-        point_size = 1
-        start_xy = (WINDOW_W // 2+offsetx, WINDOW_H // 2+offsety)  # offset for everything.
-        b_scale=1
-        b_length = 16384
+        self.WINDOW_W=window_W
+        self.WINDOW_H=window_H
+        self.FPS=fps
+        self.ONE_TIME=1
+        self.POINT_SIZE = 1
+        start_xy = (self.WINDOW_W // 2+offsetx, self.WINDOW_H // 2+offsety)
+        #B_SCALE=1
+        B_LENGTH = 16384
         
         data=fourier.process_data(fourier.select_file())
-        
         fourier_list = data[:]
+        
         # initialize pygame
         pygame.init()
         pygame.mixer.init()
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 70)
         # show window
-        screen = pygame.display.set_mode((WINDOW_W, WINDOW_H), pygame.DOUBLEBUF, 32)
+        screen = pygame.display.set_mode((self.WINDOW_W, self.WINDOW_H), pygame.DOUBLEBUF, 32)
         pygame.display.set_caption("FFT-image-drawing DEMO")
-        font = pygame.font.SysFont('simhei', 20)
+        
+        """font = pygame.font.SysFont('simhei', 20) """
 
         clock = pygame.time.Clock()
         
@@ -274,11 +286,8 @@ class MainWindow(QWidget):
 
             def draw(self, screen):
                 color_an = tuple(map(lambda x: x // 3, self.color))
-                """ draw circle
-                print(color_an, int(round(self.x)), self.y) """
-                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), point_size)
+                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), self.POINT_SIZE)
                 if self.father is not None:
-                    """ print(color_an, self.father.x, self.father.y) """
                     pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))),max(int(round(abs(self.r) * scale)), 1),1)
                     pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y),1)
 
@@ -287,7 +296,7 @@ class MainWindow(QWidget):
 
             def add_point(self, xy):
                 self.xys.append(xy)
-                if len(self.xys) > b_length:
+                if len(self.xys) > B_LENGTH:
                     self.xys.pop(0)
 
             def draw(self, screen):
@@ -306,24 +315,10 @@ class MainWindow(QWidget):
 
         # game main cycle
         while True:
-            # handle key input
+            # handle close event
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
-                elif event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        exit()
-                    elif event.key == K_LEFT and one_time > 0.1:
-                        one_time *= 0.9
-                        one_time = max(one_time, 0.1)
-                    elif event.key == K_RIGHT and one_time < 10:
-                        one_time *= 1.1
-                    elif (event.key == K_EQUALS or event.key == K_PLUS) and scale < 800:
-                        scale *= 1.1
-                    elif event.key == K_MINUS and scale > 0.001:
-                        scale *= 0.9
-                        scale = max(scale, 0.001)
-            
             # background
             screen.fill(background_color)
             # run
@@ -336,7 +331,7 @@ class MainWindow(QWidget):
             bx.draw(screen)
 
             pygame.display.update()
-            time_passed = clock.tick(FPS)
+            time_passed = clock.tick(self.FPS)
     
     def realexit(self,event):
         sys.exit()
@@ -344,23 +339,8 @@ class MainWindow(QWidget):
     def closeEvent(self, event) -> None:
         event.ignore()
 
-    
-    """
-    some game variables.
-    
-    window_W = 1500
-    window_H = 1000
-    one_time = 1  # time speed (1 by default)
-    scale = 0.75  # scale
-    fps = 144
-    b_scale = 1
-    ccolor = (250, 220, 70) # circle color
-    """
-    
-
 if __name__ == '__main__':  
     app = QApplication(sys.argv)  
     window = MainWindow()  
     window.show() 
     app.exec()
-    #sys.exit(app.exec())

@@ -1,8 +1,6 @@
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from PyQt6.QtWidgets import QApplication, QMainWindow,QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QPushButton, QLineEdit, QMessageBox,QFileDialog
-from PyQt6.QtGui import QCloseEvent, QColor, QIntValidator, QDoubleValidator
+from PyQt6.QtWidgets import QWidget, QFileDialog
 
 def select_file():
     
@@ -23,11 +21,12 @@ def select_file():
             print("void filepath") """
     
     window = MainWindow()  
-    window.show()
+    #window.show()
     if MainWindow.filepath:    
+        #MainWindow.hide() # we cannot close it since closeEvent is rewritten.
         return MainWindow.filepath
     else:
-        raise ValueError
+        raise ValueError("null file path")
 
 def process_data(filepath):
 
