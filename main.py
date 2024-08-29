@@ -231,7 +231,7 @@ class MainWindow(QWidget):
         self.WINDOW_H=window_H
         self.FPS=fps
         self.ONE_TIME=1
-        self.POINT_SIZE = 1
+        POINT_SIZE = 1
         start_xy = (self.WINDOW_W // 2+offsetx, self.WINDOW_H // 2+offsety)
         #B_SCALE=1
         B_LENGTH = 16384
@@ -286,7 +286,7 @@ class MainWindow(QWidget):
 
             def draw(self, screen):
                 color_an = tuple(map(lambda x: x // 3, self.color))
-                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), self.POINT_SIZE)
+                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), POINT_SIZE)
                 if self.father is not None:
                     pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))),max(int(round(abs(self.r) * scale)), 1),1)
                     pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y),1)
