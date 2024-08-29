@@ -1,7 +1,8 @@
 import pygame, math, os, sys
 from pygame.locals import *
-from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QPushButton, QLineEdit
-from PyQt6.QtGui import QColor, QIntValidator, QDoubleValidator
+from PyQt6.QtWidgets import QApplication, QMainWindow,QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QPushButton, QLineEdit, QMessageBox
+from PyQt6.QtGui import QCloseEvent, QColor, QIntValidator, QDoubleValidator
+import fourier
 
 class MainWindow(QWidget):  
     def __init__(self):  
@@ -12,8 +13,8 @@ class MainWindow(QWidget):
         
         #init main window
         self.setWindowTitle('Configuration')  
-        self.setGeometry(100, 100, 400, 300)  
-        mainlayout=QVBoxLayout
+        self.setGeometry(100, 100, 450, 250)  
+        mainlayout=QVBoxLayout()
         
         """
         huge amounts of pyqt gui code. no more explaination.
@@ -31,8 +32,8 @@ class MainWindow(QWidget):
             self.combo2.addItem(str(i))
             self.combo3.addItem(str(i))
         self.combo1.currentIndexChanged.connect(self.updateColor1)
-        self.combo2.currentIndexChanged.connect(self.updateColor2)
-        self.combo3.currentIndexChanged.connect(self.updateColor3)
+        self.combo2.currentIndexChanged.connect(self.updateColor1)
+        self.combo3.currentIndexChanged.connect(self.updateColor1)
         hbox1 = QHBoxLayout()
         hbox1.addWidget(self.combo1)
         hbox1.addWidget(self.combo2)
@@ -76,13 +77,13 @@ class MainWindow(QWidget):
             self.combo7.addItem(str(i))
             self.combo8.addItem(str(i))
             self.combo9.addItem(str(i))
-        self.combo4.currentIndexChanged.connect(self.updateColor3)
-        self.combo5.currentIndexChanged.connect(self.updateColor3)
-        self.combo6.currentIndexChanged.connect(self.updateColor3)
+        self.combo7.currentIndexChanged.connect(self.updateColor3)
+        self.combo8.currentIndexChanged.connect(self.updateColor3)
+        self.combo9.currentIndexChanged.connect(self.updateColor3)
         hbox3 = QHBoxLayout()
-        hbox3.addWidget(self.combo4)
-        hbox3.addWidget(self.combo5)
-        hbox3.addWidget(self.combo6)
+        hbox3.addWidget(self.combo7)
+        hbox3.addWidget(self.combo8)
+        hbox3.addWidget(self.combo9)
         self.colorLabel3=QLabel(' ', self)
         self.colorLabel3.setFixedSize(40, 40)
         layout3.addLayout(hbox3)
@@ -111,7 +112,7 @@ class MainWindow(QWidget):
         
         """row 5:graph offset x,y"""
         layout5 = QHBoxLayout()
-        self.label5 = QLabel("Graph offset")
+        label5 = QLabel("Graph offset")
         self.input3 = QLineEdit(self)
         self.input4 = QLineEdit(self)
         int_validator = QIntValidator(-2147483648, 2147483647, self)
@@ -120,8 +121,10 @@ class MainWindow(QWidget):
         hbox5=QHBoxLayout()
         hbox5.addWidget(self.input3)
         hbox5.addWidget(self.input4)
-        layout5.addWidget(self.label5)
-        layout5.addWidget(hbox5)
+        layout5.addWidget(label5)
+        hbox5_widget=QWidget()
+        hbox5_widget.setLayout(hbox5)
+        layout5.addWidget(hbox5_widget)
         
         """row 6:scale (double) and fps (int)"""
         layout6=QHBoxLayout()
@@ -137,11 +140,14 @@ class MainWindow(QWidget):
         layout6.addWidget(self.label7)
         layout6.addWidget(self.input5)
         
-        """row 7"""
-        layout7=QHBoxLayout
-        btn_close = QPushButton('Continue', self)
-        btn_close.clicked.connect(self.close)
-        layout7.addWidget(btn_close)
+        """row 8"""
+        layout8=QHBoxLayout()
+        btn_finish = QPushButton('Continue', self)
+        btn_finish.clicked.connect(self.finish)
+        btn_close=QPushButton("Exit",self)
+        btn_close.clicked.connect(self.realexit)
+        layout8.addWidget(btn_finish)
+        layout8.addWidget(btn_close)
 
         mainlayout.addLayout(layout1)
         mainlayout.addLayout(layout2)
@@ -149,7 +155,7 @@ class MainWindow(QWidget):
         mainlayout.addLayout(layout4)
         mainlayout.addLayout(layout5)
         mainlayout.addLayout(layout6)
-        mainlayout.addLayout(layout7)
+        mainlayout.addLayout(layout8)
         self.setLayout(mainlayout)
 
     """
@@ -169,25 +175,179 @@ class MainWindow(QWidget):
         color = QColor(*rgb3)  
         self.colorLabel3.setStyleSheet(f"background-color: rgb({', '.join(map(str, rgb3))});")
     
-    def closeEvent(self, event):
+    def finish(self, event):
+        
         circle_color = (int(self.combo1.currentText()), int(self.combo2.currentText()), int(self.combo3.currentText()))
         track_color = (int(self.combo4.currentText()), int(self.combo5.currentText()), int(self.combo6.currentText()))
-        background_color = (int(self.combo4.currentText()), int(self.combo5.currentText()), int(self.combo6.currentText()))
-        window_W=(int(self.input1.text()))
-        window_H=(int(self.input2.text()))
-        offsetx=(int(self.input3.text()))
-        offsety=(int(self.input4.text()))
-        scale=(float(self.double_input.text))
-        fps=(float(self.input5.text()))
+        background_color = (int(self.combo7.currentText()), int(self.combo8.currentText()), int(self.combo9.currentText()))
+        if circle_color==(0,0,0) or track_color==(0,0,0) or background_color==(0,0,0):
+            msgbox = QMessageBox()
+            msgbox.setGeometry(100, 100, 200, 100)
+            msgbox.setText("Invaild Configuration")
+            msgbox.setIcon(QMessageBox.Icon.Critical)
+            msgbox.setWindowTitle("Error")
+            msgbox.exec()
+        try:
+            window_W=(int(self.input1.text()))
+            window_H=(int(self.input2.text()))
+            offsetx=(int(self.input3.text()))
+            offsety=(int(self.input4.text()))
+            scale=(float(self.double_input.text()))
+            fps=(int(self.input5.text()))
+        except ValueError:
+            msgbox = QMessageBox()
+            msgbox.setGeometry(100, 100, 200, 100)
+            msgbox.setText("Invaild Configuration")
+            msgbox.setIcon(QMessageBox.Icon.Critical)
+            msgbox.setWindowTitle("Error")
+            msgbox.exec()
+        except TypeError:
+            msgbox = QMessageBox()
+            msgbox.setGeometry(100, 100, 200, 100)
+            msgbox.setText("Invaild Configuration")
+            msgbox.setIcon(QMessageBox.Icon.Critical)
+            msgbox.setWindowTitle("Error")
+            msgbox.exec()
+        except Exception as e:
+            msgbox = QMessageBox()
+            msgbox.setGeometry(100, 100, 200, 100)
+            msgbox.setText({e})
+            msgbox.setIcon(QMessageBox.Icon.Critical)
+            msgbox.setWindowTitle("Unknown Error")
+            msgbox.exec()
         
-        game(circle_color,track_color,background_color,window_W,window_H,offsetx,offsety,scale,fps)
+        WINDOW_W=window_W
+        WINDOW_H=window_H
+        FPS=fps
+        one_time=1
+        point_size = 1
+        start_xy = (WINDOW_W // 2+offsetx, WINDOW_H // 2+offsety)  # offset for everything.
+        b_scale=1
+        b_length = 16384
         
-        # 如果不需要阻止关闭，可以简单地让事件继续  
-        event.accept()  
+        data=fourier.process_data(fourier.select_file())
+        
+        fourier_list = data[:]
+        # initialize pygame
+        pygame.init()
+        pygame.mixer.init()
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 70)
+        # show window
+        screen = pygame.display.set_mode((WINDOW_W, WINDOW_H), pygame.DOUBLEBUF, 32)
+        pygame.display.set_caption("FFT-image-drawing DEMO")
+        font = pygame.font.SysFont('simhei', 20)
 
-def game(ccolor,tcolor,bgcolor,window_W,window_H,offx,offy,scale,fps):
+        clock = pygame.time.Clock()
+        
+        class Circle():
+            x, y = 0, 0
+            r = 0
+            angle = 0
+            angle_v = 0
+            color = (0, 0, 0)
+            father = None
+
+            def __init__(self, r, angle_v, angle, color=None, father=None):
+                self.r = r
+                self.angle_v = angle_v
+                self.angle = angle
+                self.father = father
+                if color is None:
+                    self.color = (250, 250, 250)
+                else:
+                    self.color = color
+
+            def set_xy(self, xy):
+                self.x, self.y = xy
+
+            def get_xy(self):
+                return self.x, self.y
+
+            def set_xy_by_angle(self):
+                self.x = self.father.x + self.r * math.cos(self.angle) * scale
+                self.y = self.father.y + self.r * math.sin(self.angle) * scale
+
+            def run(self, step_time):
+                if self.father is not None:
+                    self.angle += self.angle_v * step_time
+                    self.set_xy_by_angle()
+
+            def draw(self, screen):
+                color_an = tuple(map(lambda x: x // 3, self.color))
+                """ draw circle
+                print(color_an, int(round(self.x)), self.y) """
+                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), point_size)
+                if self.father is not None:
+                    """ print(color_an, self.father.x, self.father.y) """
+                    pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))),max(int(round(abs(self.r) * scale)), 1),1)
+                    pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y),1)
+
+        class Boxin():
+            xys = []
+
+            def add_point(self, xy):
+                self.xys.append(xy)
+                if len(self.xys) > b_length:
+                    self.xys.pop(0)
+
+            def draw(self, screen):
+                bl = len(self.xys)
+                for i in range(bl - 1):
+                    pygame.draw.line(screen, track_color, self.xys[i], self.xys[i + 1], 2) #draw track
+
+        super_circle = Circle(0, 0, 0, color=circle_color)
+        super_circle.set_xy(start_xy)
+        circle_list = [super_circle]
+        for i in range(len(fourier_list)):
+            p = fourier_list[i]
+            circle_list.append(Circle(p[0], p[1], p[2], color=circle_color, father=circle_list[i]))
+
+        bx = Boxin()
+
+        # game main cycle
+        while True:
+            # handle key input
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit()
+                elif event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        exit()
+                    elif event.key == K_LEFT and one_time > 0.1:
+                        one_time *= 0.9
+                        one_time = max(one_time, 0.1)
+                    elif event.key == K_RIGHT and one_time < 10:
+                        one_time *= 1.1
+                    elif (event.key == K_EQUALS or event.key == K_PLUS) and scale < 800:
+                        scale *= 1.1
+                    elif event.key == K_MINUS and scale > 0.001:
+                        scale *= 0.9
+                        scale = max(scale, 0.001)
+            
+            # background
+            screen.fill(background_color)
+            # run
+            for i, circle in enumerate(circle_list):
+                circle.run(1)
+                circle.draw(screen)
+
+            last_circle = circle_list[-1]
+            bx.add_point((last_circle.x, last_circle.y))
+            bx.draw(screen)
+
+            pygame.display.update()
+            time_passed = clock.tick(FPS)
+    
+    def realexit(self,event):
+        sys.exit()
+    
+    def closeEvent(self, event) -> None:
+        event.ignore()
+
     
     """
+    some game variables.
+    
     window_W = 1500
     window_H = 1000
     one_time = 1  # time speed (1 by default)
@@ -197,112 +357,10 @@ def game(ccolor,tcolor,bgcolor,window_W,window_H,offx,offy,scale,fps):
     ccolor = (250, 220, 70) # circle color
     """
     
-    point_size = 1
-    start_xy = (window_W // 2+offx, window_H // 2+offy)  # offset for everything.
-    b_length = 16384
 
-    from fourier import PP
-
-    fourier_list = PP[:]
-
-    # initialize pygame
-    pygame.init()
-    pygame.mixer.init()
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 70)
-    # show window
-    screen = pygame.display.set_mode((window_W, window_H), pygame.DOUBLEBUF, 32)
-    pygame.display.set_caption("FFT-image-drawing DEMO")
-    #font = pygame.font.SysFont('simhei', 20)
-
-    class Circle():
-        x, y = 0, 0
-        r = 0
-        angle = 0
-        angle_v = 0
-        color = (0, 0, 0)
-        father = None
-
-        def __init__(self, r, angle_v, angle, color=None, father=None):
-            self.r = r
-            self.angle_v = angle_v
-            self.angle = angle
-            self.father = father
-            if color is None:
-                self.color = (250, 250, 250)
-            else:
-                self.color = color
-
-        def set_xy(self, xy):
-            self.x, self.y = xy
-
-        def get_xy(self):
-            return self.x, self.y
-
-        def set_xy_by_angle(self):
-            self.x = self.father.x + self.r * math.cos(self.angle) * scale
-            self.y = self.father.y + self.r * math.sin(self.angle) * scale
-
-        def run(self, step_time):
-            if self.father is not None:
-                self.angle += self.angle_v * step_time
-                self.set_xy_by_angle()
-
-        def draw(self, screen):
-            color_an = tuple(map(lambda x: x // 3, self.color))
-            """ draw circle
-            print(color_an, int(round(self.x)), self.y) """
-            pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), point_size)
-            if self.father is not None:
-                """ print(color_an, self.father.x, self.father.y) """
-                pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))),max(int(round(abs(self.r) * scale)), 1),1)
-                pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y),1)
-
-    class Boxin():
-        xys = []
-
-        def add_point(self, xy):
-            self.xys.append(xy)
-            if len(self.xys) > b_length:
-                self.xys.pop(0)
-
-        def draw(self, screen):
-            bl = len(self.xys)
-            for i in range(bl - 1):
-                pygame.draw.line(screen, tcolor, self.xys[i], self.xys[i + 1], 2) #draw track
-
-    super_circle = Circle(0, 0, 0, color=ccolor)
-    super_circle.set_xy(start_xy)
-    circle_list = [super_circle]
-    for i in range(len(fourier_list)):
-        p = fourier_list[i]
-        circle_list.append(Circle(p[0], p[1], p[2], color=ccolor, father=circle_list[i]))
-
-    bx = Boxin()
-    clock = pygame.time.Clock()
-
-    # game main cycle
-    while True:
-        
-        # handle exit operation
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-        
-        # background
-        screen.fill(bgcolor)
-        # run
-        for i, circle in enumerate(circle_list):
-            circle.run(1)
-            circle.draw(screen)
-
-        last_circle = circle_list[-1]
-        bx.add_point((last_circle.x, last_circle.y))
-        bx.draw(screen)
-
-        pygame.display.update()
-        time_passed = clock.tick(fps)
 if __name__ == '__main__':  
     app = QApplication(sys.argv)  
-    ex = MainWindow()  
-    ex.show()  
-    sys.exit(app.exec())
+    window = MainWindow()  
+    window.show() 
+    app.exec()
+    #sys.exit(app.exec())
