@@ -4,7 +4,7 @@ THE OUTPUT CONTAINS DATA WHICH CANNOT BE PARSED BY FOURIER.PY
 YOU SHOULD PROCESS THE OUTPUT MANUALLY
 '''
 
-from typing import Iterable, List, Tuple, Union
+from typing import Iterable, List, Union
 import sys, cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,11 +20,11 @@ class MainWindow(QMainWindow):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
-        # choose file button
+        # select file button
         self.btn_select_file = QPushButton("Input Bitmap...", self)
         self.btn_select_file.clicked.connect(self.select_file)
         layout.addWidget(self.btn_select_file)
-        # choose output button
+        # select output button
         self.btn_select_folder = QPushButton("Output Folder...", self)
         self.btn_select_folder.clicked.connect(self.select_folder)
         layout.addWidget(self.btn_select_folder)
@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         # init variables
         self.file_path = None
         self.folder_path = None
-
+    
     def select_file(self):
         file_name, _ = QFileDialog.getOpenFileName(self, "Select File...", "", "PNG (*.PNG);;JPG (*.JPG);;BMP (*.BMP);;All Files (*)","PNG (*.PNG)")
         if file_name:
@@ -75,17 +75,17 @@ def dump_rings_from_image(image : np.ndarray, output_path : str, plot_dict : dic
     blur = cv2.GaussianBlur(image, (3, 3), 0)
     gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
     edge = cv2.Canny(gray, 50, 150)
-
+    
     # get ratio between width and height to adjust the final output
     valid_width = length_within_points(edge.sum(axis=0))
     valid_height = length_within_points(edge.sum(axis=1))
     true_ratio = valid_width / valid_height
-
+    
     # get contour of the edge image
     contour_tuple = cv2.findContours(edge, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
     contours = contour_tuple[0]
     rings = [np.array(c).reshape([-1, 2]) for c in contours]
-
+    
     # adjust coordinate system to the image coordinate system
     max_x, max_y, min_x, min_y = 0, 0, 0, 0
     for ring in rings:
@@ -93,17 +93,17 @@ def dump_rings_from_image(image : np.ndarray, output_path : str, plot_dict : dic
         max_y = max(max_y, ring.max(axis=0)[1])
         min_x = max(min_x, ring.min(axis=0)[0])
         min_y = max(min_y, ring.min(axis=0)[1])
-
+    
     # adjust ratio
     plt.figure(figsize=[default_height * true_ratio, default_height])
-
+    
     # generate plot
     for _, ring in enumerate(rings):
         close_ring = np.vstack((ring, ring[0]))
         xx = close_ring[..., 0]
         yy = max_y - close_ring[..., 1]
         plt.plot(xx, yy, **plot_dict)
-
+    
     plt.axis("off")
     plt.savefig(output_path, transparent=True) # "transparent=True" REMOVES BACKGROUND, SAVE A LOT OF WORK
 

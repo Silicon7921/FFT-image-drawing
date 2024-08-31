@@ -15,15 +15,13 @@ def select_file():
             event.ignore() #dumb solution
         
         filepath, _=QFileDialog.getOpenFileName(None, "Select correct path file...", "", "TXT (*.TXT)","TXT (*.TXT)")
-        """ if filepath:
+        """ for debug
+        if filepath:
             print(filepath)
         else:
             print("void filepath") """
     
-    window = MainWindow()  
-    #window.show()
     if MainWindow.filepath:    
-        #MainWindow.hide() # we cannot close it since closeEvent is overwritten.
         return MainWindow.filepath
     else:
         raise ValueError("null file path")
@@ -40,7 +38,7 @@ def process_data(filepath):
     
     def is_valid_char(c):
         return c in "MmHhLlQWERTYUIOPKJGFDSAZXCVBNqwertyuiopkjgfdsazxcvbn" # dumb solution *2
-
+    
     path_len = len(path)
     l_list = []
     i = 0
@@ -81,7 +79,7 @@ def process_data(filepath):
             i += 1
     print(len(l_list))
     point_list = []
-
+    
     for line in l_list[:-1]:
         a = line[0]
         if a == "L":
@@ -100,31 +98,28 @@ def process_data(filepath):
             point_list.append((point_list[-1][0] + line[3], point_list[-1][1] + line[4]))
         else:
             print(point_list[-1], line)
-
+    
     y = [complex(p[0] - 270, p[1] - 213.5) for p in point_list]
     y_matrix = np.array(point_list)
-
     y_len = len(y)
     yy = np.fft.fft(y) # so simple. numpy did everything for me.
-
+    
     # FOR DEBUG:
     #print(y_len, len(yy))
-
+    
     plt.plot(y_matrix[:, 0], y_matrix[:, 1])
-
     # FOR DEBUG:
     #plt.show()
-
+    
     """ def fuck(v):
         if v.real == 0 or v.imag == 0:
             return 0
         return np.arctan(v.imag / v.real) """
-
+    
     fourier_data = []
     for i, v in enumerate(yy[:y_len]):
         c = -2 * np.pi * i / y_len
         fourier_data.append([-v.real / y_len, c, np.pi / 2])
         fourier_data.append([-v.imag / y_len, c, 0])
-
     fourier_data.sort(key=lambda x: abs(x[0]), reverse=True)
     return fourier_data

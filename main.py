@@ -6,7 +6,7 @@ import fourier
 
 class MainWindow(QWidget):  
     def __init__(self):  
-
+        
         super().__init__()   
         self.initUI()
     def initUI(self):  
@@ -21,14 +21,14 @@ class MainWindow(QWidget):
         """
         
         """row 1"""
-        layout1 = QHBoxLayout()  
-        self.label1 = QLabel('Circle Color', self)  
-        layout1.addWidget(self.label1)  
-        self.combo1 = QComboBox(self)  
+        layout1 = QHBoxLayout()
+        self.label1 = QLabel('Circle Color', self)
+        layout1.addWidget(self.label1)
+        self.combo1 = QComboBox(self)
         self.combo1.setFixedSize(60,20)
-        self.combo2 = QComboBox(self)  
+        self.combo2 = QComboBox(self)
         self.combo2.setFixedSize(60,20)
-        self.combo3 = QComboBox(self)  
+        self.combo3 = QComboBox(self)
         self.combo3.setFixedSize(60,20)
         for i in range(256):
             self.combo1.addItem(str(i))
@@ -109,7 +109,7 @@ class MainWindow(QWidget):
         self.input1 = QLineEdit(self)
         self.input2 = QLineEdit(self)
         int_positive_validator = QIntValidator(1, 2147483647, self)
-        self.input1.setValidator(int_positive_validator)  
+        self.input1.setValidator(int_positive_validator)
         self.input2.setValidator(int_positive_validator)
         hbox4=QHBoxLayout()
         hbox4.addWidget(self.input1)
@@ -157,7 +157,7 @@ class MainWindow(QWidget):
         btn_close.clicked.connect(self.realexit)
         layout8.addWidget(btn_finish)
         layout8.addWidget(btn_close)
-
+        
         mainlayout.addLayout(layout1)
         mainlayout.addLayout(layout2)
         mainlayout.addLayout(layout3)
@@ -166,22 +166,22 @@ class MainWindow(QWidget):
         mainlayout.addLayout(layout6)
         mainlayout.addLayout(layout8)
         self.setLayout(mainlayout)
-
+    
     """
     handle 3 color displayer. used label to save some work.
     color1-3 = combobox 1-3,4-6,7-9
     """
     def updateColor1(self):
-        rgb1 = (int(self.combo1.currentText()), int(self.combo2.currentText()), int(self.combo3.currentText()))  
-        color = QColor(*rgb1)  
-        self.colorLabel1.setStyleSheet(f"background-color: rgb({', '.join(map(str, rgb1))});")  
-    def updateColor2(self):  
-        rgb2 = (int(self.combo4.currentText()), int(self.combo5.currentText()), int(self.combo6.currentText()))  
-        color = QColor(*rgb2)  
+        rgb1 = (int(self.combo1.currentText()), int(self.combo2.currentText()), int(self.combo3.currentText()))
+        color = QColor(*rgb1)
+        self.colorLabel1.setStyleSheet(f"background-color: rgb({', '.join(map(str, rgb1))});")
+    def updateColor2(self):
+        rgb2 = (int(self.combo4.currentText()), int(self.combo5.currentText()), int(self.combo6.currentText()))
+        color = QColor(*rgb2)
         self.colorLabel2.setStyleSheet(f"background-color: rgb({', '.join(map(str, rgb2))});")  
     def updateColor3(self):  
-        rgb3 = (int(self.combo7.currentText()), int(self.combo8.currentText()), int(self.combo9.currentText()))  
-        color = QColor(*rgb3)  
+        rgb3 = (int(self.combo7.currentText()), int(self.combo8.currentText()), int(self.combo9.currentText()))
+        color = QColor(*rgb3)
         self.colorLabel3.setStyleSheet(f"background-color: rgb({', '.join(map(str, rgb3))});")
     
     def finish(self, event):
@@ -247,8 +247,6 @@ class MainWindow(QWidget):
         screen = pygame.display.set_mode((self.WINDOW_W, self.WINDOW_H), pygame.DOUBLEBUF, 32)
         pygame.display.set_caption("FFT-image-drawing DEMO")
         
-        """font = pygame.font.SysFont('simhei', 20) """
-
         clock = pygame.time.Clock()
         
         class Circle():
@@ -258,7 +256,7 @@ class MainWindow(QWidget):
             angle_v = 0
             color = (0, 0, 0)
             father = None
-
+            
             def __init__(self, r, angle_v, angle, color=None, father=None):
                 self.r = r
                 self.angle_v = angle_v
@@ -268,51 +266,51 @@ class MainWindow(QWidget):
                     self.color = (250, 250, 250)
                 else:
                     self.color = color
-
+            
             def set_xy(self, xy):
                 self.x, self.y = xy
-
+            
             def get_xy(self):
                 return self.x, self.y
-
+            
             def set_xy_by_angle(self):
                 self.x = self.father.x + self.r * math.cos(self.angle) * scale
                 self.y = self.father.y + self.r * math.sin(self.angle) * scale
-
+            
             def run(self, step_time):
                 if self.father is not None:
                     self.angle += self.angle_v * step_time
                     self.set_xy_by_angle()
-
+            
             def draw(self, screen):
                 color_an = tuple(map(lambda x: x // 3, self.color))
                 pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), POINT_SIZE)
                 if self.father is not None:
                     pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))),max(int(round(abs(self.r) * scale)), 1),1)
                     pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y),1)
-
+        
         class Boxin():
             xys = []
-
+            
             def add_point(self, xy):
                 self.xys.append(xy)
                 if len(self.xys) > B_LENGTH:
                     self.xys.pop(0)
-
+            
             def draw(self, screen):
                 bl = len(self.xys)
                 for i in range(bl - 1):
                     pygame.draw.line(screen, track_color, self.xys[i], self.xys[i + 1], 2) #draw track
-
+        
         super_circle = Circle(0, 0, 0, color=circle_color)
         super_circle.set_xy(start_xy)
         circle_list = [super_circle]
         for i in range(len(fourier_list)):
             p = fourier_list[i]
             circle_list.append(Circle(p[0], p[1], p[2], color=circle_color, father=circle_list[i]))
-
+        
         bx = Boxin()
-
+        
         # game main cycle
         while True:
             # handle close event
@@ -325,13 +323,13 @@ class MainWindow(QWidget):
             for i, circle in enumerate(circle_list):
                 circle.run(1)
                 circle.draw(screen)
-
+            
             last_circle = circle_list[-1]
             bx.add_point((last_circle.x, last_circle.y))
             bx.draw(screen)
-
+            
             pygame.display.update()
-            time_passed = clock.tick(self.FPS)
+            #time_passed = clock.tick(self.FPS)  useless
     
     def realexit(self,event):
         sys.exit()
