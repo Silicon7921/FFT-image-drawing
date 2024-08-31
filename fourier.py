@@ -23,7 +23,7 @@ def select_file():
     window = MainWindow()  
     #window.show()
     if MainWindow.filepath:    
-        #MainWindow.hide() # we cannot close it since closeEvent is rewritten.
+        #MainWindow.hide() # we cannot close it since closeEvent is overwritten.
         return MainWindow.filepath
     else:
         raise ValueError("null file path")
