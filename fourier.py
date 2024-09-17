@@ -1,4 +1,3 @@
-import re
 import numpy as np
 import matplotlib.pyplot as plt
 from PyQt6.QtWidgets import QWidget, QFileDialog
@@ -27,23 +26,20 @@ def select_file():
     else:
         raise ValueError("null file path")
 
+def process_data(filepath):
 
-def read_file(filepath):
     try:
-        with open(filepath, "r") as file:
-            return file.read()
+        with open(filepath,"r") as file:
+            path = file.read()
     except FileNotFoundError:
         print("path file not exist.")
-        return None
     except Exception as e:
-        print(f"Unknown Error: {e}")
-        return None
-
-def is_valid_char(c):
-    valid_chars = set("MmHhLlQWERTYUIOPKJGFDSAZXCVBNqwertyuiopkjgfdsazxcvbn")
-    return c in valid_chars
-
-def parse_path(path):
+        print(f"Unknown Error:{e}")
+    
+    def is_valid_char(c):
+        valid_chars = set("MmHhLlQWERTYUIOPKJGFDSAZXCVBNqwertyuiopkjgfdsazxcvbn")
+        return c in valid_chars
+    
     path_len = len(path)
     l_list = []
     i = 0
@@ -53,6 +49,8 @@ def parse_path(path):
             i += 1
             while i < path_len and not is_valid_char(path[i]):
                 i += 1
+            if i == path_len:
+                i += 1
             if i != j:
                 s = path[j:i].strip()
                 a = s[0]
@@ -61,15 +59,18 @@ def parse_path(path):
                     l_list.append([a, float(b)])
                 elif a in "LlMm":
                     a = a.replace("M", "L").replace("m", "l")
-                    b_list = [float(bb) for bb in re.split(r'(?<=\d)-', b) if bb]
+                    b_list = b.replace("-", ",-").split(",")
+                    b_list = [float(bb) for bb in b_list if len(bb) != 0]
                     assert len(b_list) == 2
                     l_list.append([a, *b_list])
                 elif a in "Cc":
-                    b_list = [float(bb) for bb in re.split(r'(?<=\d)-', b) if bb]
+                    b_list = b.replace("-", ",-").split(",")
+                    b_list = [float(bb) for bb in b_list if len(bb) != 0]
                     assert len(b_list) == 6
                     l_list.append([a, *b_list])
                 elif a in "Ss":
-                    b_list = [float(bb) for bb in re.split(r'(?<=\d)-', b) if bb]
+                    b_list = b.replace("-", ",-").split(",")
+                    b_list = [float(bb) for bb in b_list if len(bb) != 0]
                     assert len(b_list) == 4
                     l_list.append([a, *b_list])
                 else:
@@ -77,10 +78,9 @@ def parse_path(path):
         else:
             print("error:", path[i])
             i += 1
-    return l_list
-
-def generate_point_list(l_list):
+    print(len(l_list))
     point_list = []
+    
     for line in l_list[:-1]:
         a = line[0]
         if a == "L":
@@ -99,15 +99,18 @@ def generate_point_list(l_list):
             point_list.append((point_list[-1][0] + line[3], point_list[-1][1] + line[4]))
         else:
             print(point_list[-1], line)
-    return point_list
-
-def compute_fourier_data(point_list):
+    
     y = [complex(p[0] - 270, p[1] - 213.5) for p in point_list]
     y_matrix = np.array(point_list)
     y_len = len(y)
-    yy = np.fft.fft(y)
-
+    yy = np.fft.fft(y) # so simple. numpy did everything for me.
+    
+    # FOR DEBUG:
+    #print(y_len, len(yy))
+    
     plt.plot(y_matrix[:, 0], y_matrix[:, 1])
+    # FOR DEBUG:
+    #plt.show()
     
     fourier_data = []
     for i, v in enumerate(yy[:y_len]):
@@ -116,12 +119,3 @@ def compute_fourier_data(point_list):
         fourier_data.append([-v.imag / y_len, c, 0])
     fourier_data.sort(key=lambda x: abs(x[0]), reverse=True)
     return fourier_data
-
-def process_data(filepath):
-    path = read_file(filepath)
-    if path is None:
-        return
-    
-    l_list = parse_path(path)
-    point_list = generate_point_list(l_list)
-    return compute_fourier_data(point_list)

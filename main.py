@@ -227,109 +227,98 @@ class MainWindow(QWidget):
             msgbox.setWindowTitle("Unknown Error")
             msgbox.exec()
         
-        self.WINDOW_W=window_W
-        self.WINDOW_H=window_H
-        self.FPS=fps
-        self.ONE_TIME=1
-        POINT_SIZE = 1
-        start_xy = (self.WINDOW_W // 2+offsetx, self.WINDOW_H // 2+offsety)
-        #B_SCALE=1
-        B_LENGTH = 16384
-        
-        data=fourier.process_data(fourier.select_file())
-        fourier_list = data[:]
-        
-        # initialize pygame
-        pygame.init()
-        pygame.mixer.init()
-        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (10, 70)
-        # show window
-        screen = pygame.display.set_mode((self.WINDOW_W, self.WINDOW_H), pygame.DOUBLEBUF, 32)
-        pygame.display.set_caption("FFT-image-drawing DEMO")
-        
-        clock = pygame.time.Clock()
-        
-        class Circle():
-            x, y = 0, 0
-            r = 0
-            angle = 0
-            angle_v = 0
-            color = (0, 0, 0)
-            father = None
-            
-            def __init__(self, r, angle_v, angle, color=None, father=None):
+        class Circle:
+            def __init__(self, r, angle_v, angle, color=(250, 250, 250), father=None):
                 self.r = r
                 self.angle_v = angle_v
                 self.angle = angle
                 self.father = father
-                if color is None:
-                    self.color = (250, 250, 250)
-                else:
-                    self.color = color
-            
+                self.color = color
+                self.x, self.y = 0, 0
+
             def set_xy(self, xy):
                 self.x, self.y = xy
-            
+
             def get_xy(self):
                 return self.x, self.y
-            
-            def set_xy_by_angle(self):
-                self.x = self.father.x + self.r * math.cos(self.angle) * scale
-                self.y = self.father.y + self.r * math.sin(self.angle) * scale
-            
-            def run(self, step_time):
-                if self.father is not None:
+
+            def set_xy_by_angle(self, scale):
+                if self.father:
+                    self.x = self.father.x + self.r * math.cos(self.angle) * scale
+                    self.y = self.father.y + self.r * math.sin(self.angle) * scale
+
+            def run(self, step_time, scale):
+                if self.father:
                     self.angle += self.angle_v * step_time
-                    self.set_xy_by_angle()
-            
-            def draw(self, screen):
+                    self.set_xy_by_angle(scale)
+
+            def draw(self, screen, point_size, scale):
                 color_an = tuple(map(lambda x: x // 3, self.color))
-                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), POINT_SIZE)
-                if self.father is not None:
-                    pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))),max(int(round(abs(self.r) * scale)), 1),1)
-                    pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y),1)
-        
-        class Boxin():
-            xys = []
-            
+                pygame.draw.circle(screen, self.color, (int(round(self.x)), int(round(self.y))), point_size)
+                if self.father:
+                    pygame.draw.circle(screen, color_an, (int(round(self.father.x)), int(round(self.father.y))), max(int(round(abs(self.r) * scale)), 1), 1)
+                    pygame.draw.line(screen, self.color, (self.father.x, self.father.y), (self.x, self.y), 1)
+
+        class Boxin:
+            def __init__(self, max_length):
+                self.xys = []
+                self.max_length = max_length
+
             def add_point(self, xy):
                 self.xys.append(xy)
-                if len(self.xys) > B_LENGTH:
+                if len(self.xys) > self.max_length:
                     self.xys.pop(0)
-            
-            def draw(self, screen):
-                bl = len(self.xys)
-                for i in range(bl - 1):
-                    pygame.draw.line(screen, track_color, self.xys[i], self.xys[i + 1], 2) #draw track
+
+            def draw(self, screen, track_color):
+                if len(self.xys) > 1:
+                    pygame.draw.lines(screen, track_color, False, self.xys, 2)  # Use draw.lines for efficiency
+
+        def check_exit():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
         
+        pygame.init()
+        pygame.mixer.init()
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "10,70"
+
+        screen = pygame.display.set_mode((window_W, window_H), pygame.DOUBLEBUF, 32)
+        pygame.display.set_caption("FFT-image-drawing DEMO")
+
+        clock = pygame.time.Clock()
+        POINT_SIZE = 1
+        B_LENGTH = 16384
+        start_xy = (window_W // 2 + offsetx, window_H // 2 + offsety)
+
+        data = fourier.process_data(fourier.select_file())
+        fourier_list = data[:]
+
         super_circle = Circle(0, 0, 0, color=circle_color)
         super_circle.set_xy(start_xy)
         circle_list = [super_circle]
-        for i in range(len(fourier_list)):
-            p = fourier_list[i]
+
+        for i, p in enumerate(fourier_list):
             circle_list.append(Circle(p[0], p[1], p[2], color=circle_color, father=circle_list[i]))
-        
-        bx = Boxin()
-        
-        # game main cycle
+
+        bx = Boxin(B_LENGTH)
+
+        # Game main loop
         while True:
-            # handle close event
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
-            # background
+            check_exit()
             screen.fill(background_color)
-            # run
-            for i, circle in enumerate(circle_list):
-                circle.run(1)
-                circle.draw(screen)
-            
+
+            for circle in circle_list:
+                circle.run(1, scale)
+                circle.draw(screen, POINT_SIZE, scale)
+
             last_circle = circle_list[-1]
             bx.add_point((last_circle.x, last_circle.y))
-            bx.draw(screen)
-            
+            bx.draw(screen, track_color)
+
             pygame.display.update()
-            #time_passed = clock.tick(self.FPS)  useless
+            clock.tick(fps)
     
     def realexit(self,event):
         sys.exit()
