@@ -316,7 +316,7 @@ class MainWindow(QWidget):
     def realexit(self,event):
         sys.exit()
     
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event):
         event.ignore()
 
 if __name__ == '__main__':  
