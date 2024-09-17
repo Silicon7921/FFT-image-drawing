@@ -191,13 +191,6 @@ class MainWindow(QWidget):
         circle_color = (int(self.combo1.currentText()), int(self.combo2.currentText()), int(self.combo3.currentText()))
         track_color = (int(self.combo4.currentText()), int(self.combo5.currentText()), int(self.combo6.currentText()))
         background_color = (int(self.combo7.currentText()), int(self.combo8.currentText()), int(self.combo9.currentText()))
-        if circle_color==(0,0,0) or track_color==(0,0,0) or background_color==(0,0,0):
-            msgbox = QMessageBox()
-            msgbox.setGeometry(100, 100, 200, 100)
-            msgbox.setText("Invaild Configuration")
-            msgbox.setIcon(QMessageBox.Icon.Critical)
-            msgbox.setWindowTitle("Error")
-            msgbox.exec()
         try:
             window_W=(int(self.input1.text()))
             window_H=(int(self.input2.text()))
