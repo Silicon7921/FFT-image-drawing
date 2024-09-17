@@ -1,28 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from PyQt6.QtWidgets import QWidget, QFileDialog
+from PyQt6.QtWidgets import QFileDialog
 
 def select_file():
-    
-    class MainWindow(QWidget):
-        def __init__(self):  
-            super().__init__()   
-            self.initUI()
-        def initUI(self):
-            pass
-        
-        def closeEvent(self, event) -> None:
-            event.ignore() #dumb solution
-        
-        filepath, _=QFileDialog.getOpenFileName(None, "Select correct path file...", "", "TXT (*.TXT)","TXT (*.TXT)")
-        """ for debug
-        if filepath:
-            print(filepath)
-        else:
-            print("void filepath") """
-    
-    if MainWindow.filepath:    
-        return MainWindow.filepath
+    filepath, _=QFileDialog.getOpenFileName(None, "Select correct path file...", "", "TXT (*.TXT)","TXT (*.TXT)")
+    if filepath:    
+        return filepath
     else:
         raise ValueError("null file path")
 
@@ -33,11 +16,14 @@ def process_data(filepath):
             path = file.read()
     except FileNotFoundError:
         print("path file not exist.")
+        return None
     except Exception as e:
         print(f"Unknown Error:{e}")
+        return None
+    
+    valid_chars = set("MmHhLlQWERTYUIOPKJGFDSAZXCVBNqwertyuiopkjgfdsazxcvbn")
     
     def is_valid_char(c):
-        valid_chars = set("MmHhLlQWERTYUIOPKJGFDSAZXCVBNqwertyuiopkjgfdsazxcvbn")
         return c in valid_chars
     
     path_len = len(path)
@@ -78,7 +64,7 @@ def process_data(filepath):
         else:
             print("error:", path[i])
             i += 1
-    print(len(l_list))
+
     point_list = []
     
     for line in l_list[:-1]:
